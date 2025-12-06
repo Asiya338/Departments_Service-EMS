@@ -29,4 +29,6 @@ public class DeptResponseDTO {
 	private LocalDateTime updatedAt;
 
 	private LocalDateTime deletedBy;
+
+	private boolean valid;
 }

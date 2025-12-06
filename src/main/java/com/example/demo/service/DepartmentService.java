@@ -6,11 +6,9 @@ import com.example.demo.dto.DeptCreateDTO;
 import com.example.demo.dto.DeptResponseDTO;
 import com.example.demo.dto.DeptUpdateDTO;
 
-import jakarta.validation.Valid;
-
 public interface DepartmentService {
 
-	DeptResponseDTO createDepartment(@Valid DeptCreateDTO createDTO);
+	DeptResponseDTO createDepartment(DeptCreateDTO createDTO);
 
 	List<DeptResponseDTO> getAllDepartments();
 
@@ -20,6 +18,6 @@ public interface DepartmentService {
 
 	DeptResponseDTO validateDepartmentById(int deptId);
 
-	DeptResponseDTO updateDepartmentById(int deptId, @Valid DeptUpdateDTO updateDTO);
+	DeptResponseDTO updateDepartmentById(int deptId, DeptUpdateDTO updateDTO);
 
 }
