@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeptResponseDTO {
 
-	private Long id;
+	private Integer id;
 
 	private String name;
 
