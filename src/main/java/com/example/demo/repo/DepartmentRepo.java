@@ -8,4 +8,10 @@ import com.example.demo.entity.Department;
 @Repository
 public interface DepartmentRepo extends JpaRepository<Department, Long> {
 
+	boolean existsByCode(String code);
+
+	boolean existsByDepartmentHeadId(Long departmentHeadId);
+
+	boolean existsById(int deptId);
+
 }

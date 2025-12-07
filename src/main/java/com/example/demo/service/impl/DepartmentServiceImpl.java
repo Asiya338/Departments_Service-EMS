@@ -10,6 +10,9 @@ import com.example.demo.dto.DeptCreateDTO;
 import com.example.demo.dto.DeptResponseDTO;
 import com.example.demo.dto.DeptUpdateDTO;
 import com.example.demo.entity.Department;
+import com.example.demo.enums.ErrorCodeEnum;
+import com.example.demo.exception.DuplicateResourceException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repo.DepartmentRepo;
 import com.example.demo.service.DepartmentService;
 
@@ -17,8 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class DepartmentServiceImpl implements DepartmentService {
 
 	private final DepartmentRepo departmentRepo;
@@ -28,7 +31,22 @@ public class DepartmentServiceImpl implements DepartmentService {
 	public DeptResponseDTO createDepartment(DeptCreateDTO createDTO) {
 		log.info("Create department DTO : {} ", createDTO);
 
-		Department department = modelMapper.map(createDTO, Department.class);
+		// to check whether department with same code already exists
+		if (departmentRepo.existsByCode(createDTO.getCode())) {
+			throw new DuplicateResourceException(ErrorCodeEnum.DUPLICATE_DEPT_CODE.getErrorCode(),
+					ErrorCodeEnum.DUPLICATE_DEPT_CODE.getErrorMessage());
+		}
+
+		// to check department head id is unique
+		if (departmentRepo.existsByDepartmentHeadId(createDTO.getDepartmentHeadId())) {
+			throw new DuplicateResourceException(ErrorCodeEnum.DUPLICATE_DEPT_HEAD_ID.getErrorCode(),
+					ErrorCodeEnum.DUPLICATE_DEPT_HEAD_ID.getErrorMessage());
+		}
+
+		Department department = new Department();
+		department.setName(createDTO.getName());
+		department.setCode(createDTO.getCode().toUpperCase());
+		department.setDepartmentHeadId(createDTO.getDepartmentHeadId());
 
 		Department savedDepartment = departmentRepo.save(department);
 
@@ -57,14 +75,16 @@ public class DepartmentServiceImpl implements DepartmentService {
 	public DeptResponseDTO getDepartmentById(int deptId) {
 		log.info(" department id || getDepartmentById : {} ", deptId);
 
-		Department department = departmentRepo.findById((long) deptId).orElse(null);
-		DeptResponseDTO response = new DeptResponseDTO();
-
-		if (department != null) {
-			response = modelMapper.map(department, DeptResponseDTO.class);
+		if (!departmentRepo.existsById(deptId)) {
+			throw new ResourceNotFoundException(ErrorCodeEnum.RESOURCE_WITH_ID_NOT_FOUND.getErrorCode(),
+					ErrorCodeEnum.RESOURCE_WITH_ID_NOT_FOUND.getErrorMessage() + " : " + deptId);
 		}
 
-		log.info("Department with ID || getDepartmentById : {} ", response);
+		Department department = departmentRepo.findById((long) deptId).orElse(null);
+
+		DeptResponseDTO response = modelMapper.map(department, DeptResponseDTO.class);
+
+		log.info("Department with ID : {} || getDepartmentById : {} ", deptId, response);
 
 		return response;
 	}
@@ -72,6 +92,12 @@ public class DepartmentServiceImpl implements DepartmentService {
 	@Override
 	public DeptResponseDTO deleteDepartmentById(int deptId) {
 		log.info("Deleting department with ID : {}  ", deptId);
+
+		if (!departmentRepo.existsById(deptId)) {
+			throw new ResourceNotFoundException(ErrorCodeEnum.RESOURCE_WITH_ID_NOT_FOUND.getErrorCode(),
+					ErrorCodeEnum.RESOURCE_WITH_ID_NOT_FOUND.getErrorMessage() + " : " + deptId
+							+ " || Failed to delete");
+		}
 
 		departmentRepo.deleteById((long) deptId);
 
@@ -88,12 +114,17 @@ public class DepartmentServiceImpl implements DepartmentService {
 	public DeptResponseDTO validateDepartmentById(int deptId) {
 		log.info(" department id || validateDepartmentById : {} ", deptId);
 
-		Department department = departmentRepo.findById((long) deptId).orElse(null);
 		DeptResponseDTO response = new DeptResponseDTO();
-
-		if (department != null) {
-			response = modelMapper.map(department, DeptResponseDTO.class);
+		if (!departmentRepo.existsById(deptId)) {
+			log.info("There is no department with ID : {}", deptId);
+			response.setValid(false);
+			return response;
 		}
+
+		Department department = departmentRepo.findById((long) deptId).orElse(null);
+
+		response = modelMapper.map(department, DeptResponseDTO.class);
+		response.setValid(true);
 
 		log.info("Department validated || validateDepartmentById : {} ", response);
 
@@ -104,7 +135,23 @@ public class DepartmentServiceImpl implements DepartmentService {
 	public DeptResponseDTO updateDepartmentById(int deptId, DeptUpdateDTO updateDTO) {
 		log.info("Update department DTO : {} ", updateDTO);
 
-		Department department = modelMapper.map(updateDTO, Department.class);
+		Department department = departmentRepo.findById((long) deptId).orElseThrow(() -> new ResourceNotFoundException(
+				ErrorCodeEnum.RESOURCE_WITH_ID_NOT_FOUND.getErrorCode(),
+				ErrorCodeEnum.RESOURCE_WITH_ID_NOT_FOUND.getErrorMessage() + " : " + deptId + " || Updation failed"));
+
+		// to check whether department with same code already exists
+		if (departmentRepo.existsByCode(updateDTO.getCode())) {
+			throw new DuplicateResourceException(ErrorCodeEnum.DUPLICATE_DEPT_CODE.getErrorCode(),
+					ErrorCodeEnum.DUPLICATE_DEPT_CODE.getErrorMessage());
+		}
+
+		// to check department head id is unique
+		if (departmentRepo.existsByDepartmentHeadId(updateDTO.getDepartmentHeadId())) {
+			throw new DuplicateResourceException(ErrorCodeEnum.DUPLICATE_DEPT_HEAD_ID.getErrorCode(),
+					ErrorCodeEnum.DUPLICATE_DEPT_HEAD_ID.getErrorMessage());
+		}
+
+		modelMapper.map(updateDTO, department);
 
 		Department savedDepartment = departmentRepo.save(department);
 

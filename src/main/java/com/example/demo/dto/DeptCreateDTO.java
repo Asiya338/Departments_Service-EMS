@@ -17,9 +17,14 @@ public class DeptCreateDTO {
 	private String name;
 
 	@NotBlank(message = "Department code is mandatory")
-	@Size(min = 3, max = 3, message = "Department code must be 3 characters")
+	@Size(min = 5, max = 5, message = "Department code must be 5 characters")
 	private String code;
 
 	@NotNull(message = "Department Head ID is mandatory")
 	private Long departmentHeadId;
+
+	public boolean existsByDepartmentHeadId(Long departmentHeadId2) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

@@ -14,9 +14,7 @@ public class CustomConfig {
 	@Bean
 	ModelMapper modelMapper() {
 		ModelMapper mapper = new ModelMapper();
-		mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT).setSkipNullEnabled(true); // Useful for
-																											// update
-																											// DTO
+		mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE).setSkipNullEnabled(true);
 
 		log.info("Model Mapper Configured with STRICT matching strategy and skip null enabled");
 

@@ -14,19 +14,21 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity
 @Table(name = "departments")
+@Data
 public class Department {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+	private Long id;
 
 	@Column(nullable = false, unique = true, length = 50)
 	private String name;
 
-	@Column(nullable = false, unique = true, length = 6)
+	@Column(nullable = false, unique = true, length = 5)
 	private String code;
 
 	@Column(name = "department_head_id", nullable = false)
