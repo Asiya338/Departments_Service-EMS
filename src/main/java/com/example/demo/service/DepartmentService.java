@@ -2,22 +2,22 @@ package com.example.demo.service;
 
 import java.util.List;
 
-import com.example.demo.dto.DeptCreateDTO;
-import com.example.demo.dto.DeptResponseDTO;
-import com.example.demo.dto.DeptUpdateDTO;
+import com.example.demo.dto.DepartmentCreateDTO;
+import com.example.demo.dto.DepartmentResponseDTO;
+import com.example.demo.dto.DepartmentUpdateDTO;
 
 public interface DepartmentService {
 
-	DeptResponseDTO createDepartment(DeptCreateDTO createDTO);
+	DepartmentResponseDTO createDepartment(DepartmentCreateDTO createDTO);
 
-	List<DeptResponseDTO> getAllDepartments();
+	List<DepartmentResponseDTO> getAllDepartments();
 
-	DeptResponseDTO getDepartmentById(int deptId);
+	DepartmentResponseDTO getDepartmentById(int deptId);
 
-	DeptResponseDTO deleteDepartmentById(int deptId);
+	DepartmentResponseDTO deleteDepartmentById(int deptId);
 
-	DeptResponseDTO validateDepartmentById(int deptId);
+	DepartmentResponseDTO validateDepartmentById(int deptId);
 
-	DeptResponseDTO updateDepartmentById(int deptId, DeptUpdateDTO updateDTO);
+	DepartmentResponseDTO updateDepartmentById(int deptId, DepartmentUpdateDTO updateDTO);
 
 }

@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.DeptCreateDTO;
-import com.example.demo.dto.DeptResponseDTO;
-import com.example.demo.dto.DeptUpdateDTO;
+import com.example.demo.dto.DepartmentCreateDTO;
+import com.example.demo.dto.DepartmentResponseDTO;
+import com.example.demo.dto.DepartmentUpdateDTO;
 import com.example.demo.service.DepartmentService;
 
 import jakarta.validation.Valid;
@@ -31,10 +31,10 @@ public class DepartmentController {
 	private final DepartmentService departmentService;
 
 	@PostMapping()
-	public ResponseEntity<DeptResponseDTO> createDepartment(@Valid @RequestBody DeptCreateDTO createDTO) {
+	public ResponseEntity<DepartmentResponseDTO> createDepartment(@Valid @RequestBody DepartmentCreateDTO createDTO) {
 		log.info("Creating department with details : {} ", createDTO);
 
-		DeptResponseDTO response = departmentService.createDepartment(createDTO);
+		DepartmentResponseDTO response = departmentService.createDepartment(createDTO);
 
 		URI location = URI.create("/api/v1/departments/" + response.getId());
 
@@ -44,10 +44,10 @@ public class DepartmentController {
 	}
 
 	@GetMapping()
-	public ResponseEntity<List<DeptResponseDTO>> getAllDepartments() {
+	public ResponseEntity<List<DepartmentResponseDTO>> getAllDepartments() {
 		log.info("Get all the departments");
 
-		List<DeptResponseDTO> response = departmentService.getAllDepartments();
+		List<DepartmentResponseDTO> response = departmentService.getAllDepartments();
 
 		log.info("All departments : {} ", response);
 
@@ -55,10 +55,10 @@ public class DepartmentController {
 	}
 
 	@GetMapping("/{deptId}")
-	public ResponseEntity<DeptResponseDTO> getDepartmentById(@PathVariable int deptId) {
+	public ResponseEntity<DepartmentResponseDTO> getDepartmentById(@PathVariable int deptId) {
 		log.info("Fetch department by deptId : {} ", deptId);
 
-		DeptResponseDTO response = departmentService.getDepartmentById(deptId);
+		DepartmentResponseDTO response = departmentService.getDepartmentById(deptId);
 
 		log.info("Department by ID: {} || Department : {} ", deptId, response);
 
@@ -66,10 +66,10 @@ public class DepartmentController {
 	}
 
 	@DeleteMapping("/{deptId}")
-	public ResponseEntity<DeptResponseDTO> deleteDepartmentById(@PathVariable int deptId) {
+	public ResponseEntity<DepartmentResponseDTO> deleteDepartmentById(@PathVariable int deptId) {
 		log.info("Delete department by deptId : {} ", deptId);
 
-		DeptResponseDTO response = departmentService.deleteDepartmentById(deptId);
+		DepartmentResponseDTO response = departmentService.deleteDepartmentById(deptId);
 
 		log.info("Department deleted with ID : {} || deleted department : {} ", deptId, response);
 
@@ -77,11 +77,11 @@ public class DepartmentController {
 	}
 
 	@PutMapping("/{deptId}")
-	public ResponseEntity<DeptResponseDTO> updateDepartmentById(@PathVariable int deptId,
-			@Valid @RequestBody DeptUpdateDTO updateDTO) {
+	public ResponseEntity<DepartmentResponseDTO> updateDepartmentById(@PathVariable int deptId,
+			@Valid @RequestBody DepartmentUpdateDTO updateDTO) {
 		log.info("Update department by deptId : {} || UPDATE details : {}  ", deptId, updateDTO);
 
-		DeptResponseDTO response = departmentService.updateDepartmentById(deptId, updateDTO);
+		DepartmentResponseDTO response = departmentService.updateDepartmentById(deptId, updateDTO);
 
 		log.info("Department updated with ID : {} || updated Department : {}", deptId, updateDTO);
 
@@ -89,10 +89,10 @@ public class DepartmentController {
 	}
 
 	@GetMapping("/check/{deptId}")
-	public ResponseEntity<DeptResponseDTO> validateDepartmentById(@PathVariable int deptId) {
+	public ResponseEntity<DepartmentResponseDTO> validateDepartmentById(@PathVariable int deptId) {
 		log.info("Validate department exists by deptId : {} ", deptId);
 
-		DeptResponseDTO response = departmentService.validateDepartmentById(deptId);
+		DepartmentResponseDTO response = departmentService.validateDepartmentById(deptId);
 
 		log.info("Department validated with ID : {} || department : {}", deptId, response);
 

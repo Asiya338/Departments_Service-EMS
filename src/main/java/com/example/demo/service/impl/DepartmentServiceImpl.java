@@ -4,11 +4,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.DeptCreateDTO;
-import com.example.demo.dto.DeptResponseDTO;
-import com.example.demo.dto.DeptUpdateDTO;
+import com.example.demo.dto.DepartmentResponseDTO;
+import com.example.demo.dto.DepartmentCreateDTO;
+import com.example.demo.dto.DepartmentUpdateDTO;
 import com.example.demo.entity.Department;
 import com.example.demo.enums.ErrorCodeEnum;
 import com.example.demo.exception.DuplicateResourceException;
@@ -28,7 +29,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 	private final ModelMapper modelMapper;
 
 	@Override
-	public DeptResponseDTO createDepartment(DeptCreateDTO createDTO) {
+	public DepartmentResponseDTO createDepartment(DepartmentCreateDTO createDTO) {
 		log.info("Create department DTO : {} ", createDTO);
 
 		// to check whether department with same code already exists
@@ -50,7 +51,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 		Department savedDepartment = departmentRepo.save(department);
 
-		DeptResponseDTO response = modelMapper.map(savedDepartment, DeptResponseDTO.class);
+		DepartmentResponseDTO response = modelMapper.map(savedDepartment, DepartmentResponseDTO.class);
 
 		log.info("Department created : {} ", response);
 
@@ -58,13 +59,13 @@ public class DepartmentServiceImpl implements DepartmentService {
 	}
 
 	@Override
-	public List<DeptResponseDTO> getAllDepartments() {
+	public List<DepartmentResponseDTO> getAllDepartments() {
 		log.info("Fetching all departments");
 
 		List<Department> allDepartments = departmentRepo.findAll();
 
-		List<DeptResponseDTO> response = allDepartments.stream()
-				.map(department -> modelMapper.map(department, DeptResponseDTO.class)).toList();
+		List<DepartmentResponseDTO> response = allDepartments.stream()
+				.map(department -> modelMapper.map(department, DepartmentResponseDTO.class)).toList();
 
 		log.info("All departments : {} ", response);
 
@@ -72,7 +73,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 	}
 
 	@Override
-	public DeptResponseDTO getDepartmentById(int deptId) {
+	public DepartmentResponseDTO getDepartmentById(int deptId) {
 		log.info(" department id || getDepartmentById : {} ", deptId);
 
 		if (!departmentRepo.existsById(deptId)) {
@@ -82,7 +83,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 		Department department = departmentRepo.findById((long) deptId).orElse(null);
 
-		DeptResponseDTO response = modelMapper.map(department, DeptResponseDTO.class);
+		DepartmentResponseDTO response = modelMapper.map(department, DepartmentResponseDTO.class);
 
 		log.info("Department with ID : {} || getDepartmentById : {} ", deptId, response);
 
@@ -90,7 +91,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 	}
 
 	@Override
-	public DeptResponseDTO deleteDepartmentById(int deptId) {
+	public DepartmentResponseDTO deleteDepartmentById(int deptId) {
 		log.info("Deleting department with ID : {}  ", deptId);
 
 		if (!departmentRepo.existsById(deptId)) {
@@ -101,9 +102,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 		departmentRepo.deleteById((long) deptId);
 
-		DeptResponseDTO response = new DeptResponseDTO();
+		DepartmentResponseDTO response = new DepartmentResponseDTO();
 		response.setId(deptId);
-		response.setDeletedBy(LocalDateTime.now());
+		response.setDeletedAt(LocalDateTime.now());
 
 		log.info("Department deleted : {} ", response);
 
@@ -111,10 +112,10 @@ public class DepartmentServiceImpl implements DepartmentService {
 	}
 
 	@Override
-	public DeptResponseDTO validateDepartmentById(int deptId) {
+	public DepartmentResponseDTO validateDepartmentById(int deptId) {
 		log.info(" department id || validateDepartmentById : {} ", deptId);
 
-		DeptResponseDTO response = new DeptResponseDTO();
+		DepartmentResponseDTO response = new DepartmentResponseDTO();
 		if (!departmentRepo.existsById(deptId)) {
 			log.info("There is no department with ID : {}", deptId);
 			response.setValid(false);
@@ -123,7 +124,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 		Department department = departmentRepo.findById((long) deptId).orElse(null);
 
-		response = modelMapper.map(department, DeptResponseDTO.class);
+		response = modelMapper.map(department, DepartmentResponseDTO.class);
 		response.setValid(true);
 
 		log.info("Department validated || validateDepartmentById : {} ", response);
@@ -131,8 +132,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 		return response;
 	}
 
+	@CacheEvict(value = "departmentCache", key = "#deptId")
 	@Override
-	public DeptResponseDTO updateDepartmentById(int deptId, DeptUpdateDTO updateDTO) {
+	public DepartmentResponseDTO updateDepartmentById(int deptId, DepartmentUpdateDTO updateDTO) {
 		log.info("Update department DTO : {} ", updateDTO);
 
 		Department department = departmentRepo.findById((long) deptId).orElseThrow(() -> new ResourceNotFoundException(
@@ -140,13 +142,14 @@ public class DepartmentServiceImpl implements DepartmentService {
 				ErrorCodeEnum.RESOURCE_WITH_ID_NOT_FOUND.getErrorMessage() + " : " + deptId + " || Updation failed"));
 
 		// to check whether department with same code already exists
-		if (departmentRepo.existsByCode(updateDTO.getCode())) {
+		if (departmentRepo.existsByCode(updateDTO.getCode()) && !updateDTO.getCode().equals(department.getCode())) {
 			throw new DuplicateResourceException(ErrorCodeEnum.DUPLICATE_DEPT_CODE.getErrorCode(),
 					ErrorCodeEnum.DUPLICATE_DEPT_CODE.getErrorMessage());
 		}
 
 		// to check department head id is unique
-		if (departmentRepo.existsByDepartmentHeadId(updateDTO.getDepartmentHeadId())) {
+		if (departmentRepo.existsByDepartmentHeadId(updateDTO.getDepartmentHeadId())
+				&& !updateDTO.getDepartmentHeadId().equals(department.getDepartmentHeadId())) {
 			throw new DuplicateResourceException(ErrorCodeEnum.DUPLICATE_DEPT_HEAD_ID.getErrorCode(),
 					ErrorCodeEnum.DUPLICATE_DEPT_HEAD_ID.getErrorMessage());
 		}
@@ -155,7 +158,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 		Department savedDepartment = departmentRepo.save(department);
 
-		DeptResponseDTO response = modelMapper.map(savedDepartment, DeptResponseDTO.class);
+		DepartmentResponseDTO response = modelMapper.map(savedDepartment, DepartmentResponseDTO.class);
 
 		log.info("Department updated : {} ", response);
 
